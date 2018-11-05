@@ -2,10 +2,10 @@ var mysql = require('mysql');
 var inquirer = require('inquirer');
 var Table = require('cli-table3');
 
-// let createTable = function () {
-//     departmentT = new Table('Department Id', 'Department Name', 'Over-Head-Cost', 'Product Sales', 'Total Profit')
-// };
-// createTable();
+let createTable = function () {
+    departmentT = new Table('Department Name', 'Over-Head-Cost', 'Product Sales', 'Total Profit')
+};
+createTable();
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -22,9 +22,9 @@ var connection = mysql.createConnection({
     database: "bamazonDB"
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
     if (err) throw err;
-	});
+});
 
 //--  table and formatting  --//
 //************************************************//
@@ -32,19 +32,19 @@ connection.connect(function(err) {
 //************************************************//
 //
 
-	var welcome = "    **********************************************************************\n" +
-				  "    **********                BAMAZON SUPERVISOR                **********\n" +
-				  "    **********                Manage departments                **********\n" +
-				  "    **********                                                  **********\n" +
-				  "    **********************************************************************\n\r"
+var welcome = "    **********************************************************************\n" +
+    "    **********                BAMAZON SUPERVISOR                **********\n" +
+    "    **********                Manage departments                **********\n" +
+    "    **********                                                  **********\n" +
+    "    **********************************************************************\n\r"
 
-	var departmentMsg;
+var departmentMsg;
 
-	var goodbye = "    **********************************************************************\n" +
-				  "    **********           EXTING BAMAZON SUPERVISOR              **********\n" +
-				  "    **********           Making money every day!                **********\n" +
-				  "    **********                                                  **********\n" +
-				  "    **********************************************************************\n\r"
+var goodbye = "    **********************************************************************\n" +
+    "    **********           EXTING BAMAZON SUPERVISOR              **********\n" +
+    "    **********           Making money every day!                **********\n" +
+    "    **********                                                  **********\n" +
+    "    **********************************************************************\n\r"
 
 
 
@@ -53,96 +53,97 @@ connection.connect(function(err) {
 //************************************************//
 //
 //----  Main menu with user input  ----//
-	function supervisorMenu(){
+function supervisorMenu() {
 
-		inquirer.prompt([
-		 	{
-			    type: "list",
-			    message: "What do you want to do?",
-			    choices: ["View Products Sales by Department", "Create New Department", "Exit"],
-			    name: "superDoItem"
-		  	}
-	  	])
-		.then(function(supervisor_menu) {
-			switch(supervisor_menu.superDoItem){
-				case "View Products Sales by Department":
-					displayDepartments();
-					break;
-				case "Create New Department":
-					addDepartment();
-					break;
-				case "Exit":
-					exitBamazonMgr();
-					break;
-			};
-		});
-	};
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "What do you want to do?",
+            choices: ["View Products Sales by Department", "Create New Department", "Exit"],
+            name: "superDoItem"
+        }
+    ])
+        .then(function (supervisor_menu) {
+            switch (supervisor_menu.superDoItem) {
+                case "View Products Sales by Department":
+                    displayDepartments();
+                    break;
+                case "Create New Department":
+                    addDepartment();
+                    break;
+                case "Exit":
+                    exitBamazonMgr();
+                    break;
+            };
+        });
+};
 
 //----  Display table of inventory items  ----//
-	function displayDepartments() {
+function displayDepartments() {
 
-		connection.query("SELECT * FROM departments", function(err, res) {
-		    if (err) throw err;
+    let query = connection.query(`SELECT departments.department_name, departments.over_head_costs, ` +
+        `SUM(products.product_sales) AS product_sales, ` +
+        `SUM(products.product_sales) - departments.over_head_costs AS total_profit ` +
+        `FROM departments LEFT JOIN products ON departments.department_name = products.department_name ` +
+        `GROUP BY departments.department_name;`,
+        (function (err, res) {
+            if (err) throw err
+            for (let i = 0; i < res.length; i++) {
+                console.log([res[i].department_name, `$${res[i].over_head_costs}`, `$${res[i].product_sales}`, `$${res[i].total_profit}`]);
+            };
+            // res.forEach( (value)=> {
+            //     departmentT.push([
+            //         value.department_name,
+            //         value.over_head_costs,
+            //         value.product_sales,
+            //         value.total_profits,
+            //     ]);
+            // });
+            console.log(departmentT.toString());
+        }))
 
-		    //console.log(" Reached first function")
-			var table = new Table({
-				head: ["Department Id", "Department Name", "Over head Costs", "product sales", "Profit"],
-				});
-            res.forEach(value => {
-                var profits = value.product_sales - value.over_head_costs
-                table.push([
-                    value.department_id,
-                    value.department_name,
-                    value.over_head_costs,
-                    value.product_sales,
-                    profits
-                ]);
-            });
-            console.log(table.toString());
-
-			supervisorMenu();
-		});
-	};
+    supervisorMenu();
+};
 
 
 //----  Add a new inventory item  ----//
-	function addDepartment(){
-		//console.log("still working on this")
-		inquirer.prompt([
-				{
-					type: "input",
-					message: "What is the name of the department you would like to add? ",
-					name: "itemDept"
-				},
-				{
-					type: "input",
-					message: "What is the over_head cost for this department?",
-					name: "itemCost"
-				}
-			])
-		.then(function (addDept) {
-			connection.query("INSERT INTO departments SET ?", 
-				{
-					department_name: addDept.itemDept,
-					over_head_costs: addDept.itemCost,
-					product_sales: 0
-				}, 
-				function(err, res) {
-					if(err) throw err;
+function addDepartment() {
+    //console.log("still working on this")
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "What is the name of the department you would like to add? ",
+            name: "itemDept"
+        },
+        {
+            type: "input",
+            message: "What is the over_head cost for this department?",
+            name: "itemCost"
+        }
+    ])
+        .then(function (addDept) {
+            connection.query("INSERT INTO departments SET ?",
+                {
+                    department_name: addDept.itemDept,
+                    over_head_costs: addDept.itemCost,
+                    product_sales: 0
+                },
+                function (err, res) {
+                    if (err) throw err;
 
-					departmentMsg = "    " + addDept.itemDept + " department has been added with an over_head_costs of " + addDept.itemCost ;
-					console.log(departmentMsg);
-					supervisorMenu();
-				}
-			);
-		});
-	};
+                    departmentMsg = "    " + addDept.itemDept + " department has been added with an over_head_costs of " + addDept.itemCost;
+                    console.log(departmentMsg);
+                    supervisorMenu();
+                }
+            );
+        });
+};
 
 //----  Exit the program  ----//
-	function exitBamazonMgr(){
-		connection.end();
-		console.log(goodbye);
-	};
+function exitBamazonMgr() {
+    connection.end();
+    console.log(goodbye);
+};
 
 
 
@@ -151,9 +152,9 @@ connection.connect(function(err) {
 //*****          Start the program           *****//
 //************************************************//
 //
-	
-	console.log(welcome);
-	supervisorMenu();
+
+console.log(welcome);
+supervisorMenu();
 
 // connection.connect(function(err) {
 //     if (err) throw err;
