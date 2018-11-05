@@ -54,7 +54,7 @@ var goodbye = "    *************************************************************
 //************************************************//
 //
 
-//----  Display table of items for sale  ----//
+//----  Display table of items for sale  ----//  
 function displayProducts() {
 
     console.log(welcome);
