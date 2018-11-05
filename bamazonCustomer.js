@@ -49,150 +49,14 @@ var goodbye = "    *************************************************************
 
 
 
-//************************************************//  
-//*****           global functions           *****//
-//************************************************//
-//
-
-//----  Display table of items for sale  ----//  
-function displayProducts() {
-
-    console.log(welcome);
-
-    connection.query("SELECT * FROM products", function (err, res) {
-        if (err) throw err;
-
-        //console.log(" Reached first function")
-
-        for (var i = 0; i < res.length; i++) {
-            table.push(
-                [res[i].item_id, res[i].product_name, res[i].department_name, parseFloat(res[i].price).toFixed(2), res[i].stock_quantity]
-            );
-        };
-
-        console.log(table.toString());
-        orderMenu();
-    });
-};
-
-
-//----  Get user order input and update tables  ----//
-function orderMenu() {
-
-    inquirer.prompt([
-        {
-            type: "input",
-            message: "Which item would you like to purchase? (Iten Number) ",
-            name: "itemNum"
-        },
-        {
-            type: "input",
-            message: "How many would you like to purchase?",
-            name: "Qty"
-        }
-    ])
-        .then(function (userOrder) {
-
-            connection.query("SELECT * FROM products JOIN departments ON products.department_name = departments.department_name",
-                function (err, res) {
-                    if (err) throw err;
-
-                    var i = userOrder.itemNum - 1;
-
-                    if (res[i].stock_quantity >= userOrder.Qty) {
-
-                        var updateQty = parseInt(res[i].stock_quantity) - parseInt(userOrder.Qty);
-
-                        var OrderTotal = parseFloat(res[i].price) * parseFloat(userOrder.Qty);
-                        OrderTotal = OrderTotal.toFixed(2);
-
-                        //-- Update the product table stock quantity  --//
-                        connection.query("UPDATE products SET ? WHERE ?",
-                            [{
-                                stock_quantity: updateQty
-                            },
-                            {
-                                item_id: userOrder.itemNum
-                            }],
-                            function (error, results) {
-
-                                if (error) throw error;
-
-                                orderMsg = "     Your order for " + userOrder.Qty + "  " + res[i].product_name + " has been placed.  \n" +
-                                    "     Your total is $ " + OrderTotal + "  \n";
-
-                                console.log(orderMsg);
-                            }
-                        );
-
-
-                        //-- Update the departments table total sales  --//
-                        var deptSales = parseFloat(res[i].product_sales) + parseFloat(OrderTotal);
-                        deptSales = deptSales.toFixed(2);
-                        var totalSales = userOrder.Qty * res[i].price;
-
-                        connection.query("UPDATE departments SET ? WHERE ?", [
-                            { product_sales: totalSales },
-                            { department_name: res[userOrder.itemNum - 1].department_name }
-                        ],
-                            function (error, results) {
-                                //console.log("Order status updated. " + deptSales)
-                                continueShopping();
-                            }
-                        );
-
-                    }
-
-                    else {
-                        orderMsg = "     Insufficient quantity -- We only have " + res[i].stock_quantity + " " + res[i].product_name + " \n" +
-                            "     We are sorry that we cannot fullfill your order request for  " + userOrder.Qty + " " + res[i].product_name + " \n";
-
-                        console.log(orderMsg);
-                        continueShopping();
-                    }
-                });
-
-        });
-};
-
-
-//----  Ask the user if they would like to continue shopping  ----//
-function continueShopping() {
-    inquirer.prompt([
-        {
-            type: "confirm",
-            message: "Would you like to continue shopping? ",
-            name: "cont"
-        }
-    ])
-        .then(function (shopping) {
-            if (shopping.cont) {
-                displayProducts();
-            }
-            else {
-                exitBamazon();
-            }
-        });
-};
-
-
-
-//----  Say goodbye  ----//
-function exitBamazon() {
-    connection.end();
-    console.log(goodbye);
-};
-
-
 //************************************************//
 //*****          Start the program           *****//
 //************************************************//
 //
-displayProducts();
 function checkStock() {
     connection.query("SELECT * FROM products", function (err, res) {
         console.log('----------------------------------------------')
-        console.log("Greetings! This is what we have in stock");
+        console.log(welcome);
         let red;
         res.forEach(value => {
             if (value.stock_quantity < 5) {
@@ -220,7 +84,7 @@ function checkStock() {
                 message: "How much do you wish to buy?"
             }
         ]).then(function (product) {
-            connection.query("SELECT * FROM products JOIN departments ON products.department_name = departments.department_name"
+            connection.query("SELECT * FROM products JOIN departments ON products.department_name = departments.department_name",
             function (err, res){
                 if(err) throw err;
             var x = product.Item_ID;
@@ -241,12 +105,54 @@ function checkStock() {
                         {
                             item_id: x
                         }
+                    ],
+
+                    'UPDATE departments SET ? WHERE ?',[
+                        {
+                            product_sales: (y * res[x - 1].price),
+
+                        },
+                        {
+                            department_name: x
+                        }
                     ]
                 )
-                connection.end();
             };
+            continueShopping();
         });
-        }
+
+
+        });
+
     })
+
 }
-checkStock();
+checkStock(
+);
+
+//----  Ask the user if they would like to continue shopping  ----//
+function continueShopping() {
+    inquirer.prompt([
+        {
+            type: "confirm",
+            message: "Would you like to continue shopping? ",
+            name: "cont"
+        }
+    ])
+        .then(function (shopping) {
+            if (shopping.cont) {
+                checkStock();
+            }
+            else {
+                exitBamazon();
+            }
+        });
+};
+
+
+
+//----  Say goodbye  ----//
+function exitBamazon() {
+    connection.end();
+    console.log(goodbye);
+};
