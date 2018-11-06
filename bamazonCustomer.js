@@ -8,7 +8,8 @@ let createTable = function () {
         head: ["Item Number", "Product Name", "Department", "Price", "Quantity"],
         colWidths: [13, 20, 20, 13, 13],
     });
-}; createTable();
+};
+createTable();
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -25,8 +26,7 @@ var connection = mysql.createConnection({
     database: "bamazonDB"
 });
 
-
-// Connects to the server, if it successfully connects, console.logs "Successfully connected to the Bamazon Server!" then calls the initialList function.
+// Connects to the server and gives a log if connects
 connection.connect(function (err) {
     if (err) throw err;
     console.log("Successfully connected to the Bamazon Server!");
@@ -43,16 +43,12 @@ var orderMsg;
 
 var goodbye = "    **********************************************************************\n" +
     "    **********       THANK YOU FOR SHOPPING BAMAZON             **********\n" +
-    "    **********          Please visit us again! ;)               **********\n" +
-    "    **********                                                  **********\n" +
+    "    **********          Please visit us again! :D               **********\n" +
     "    **********************************************************************\n\r"
 
 
 
-//************************************************//
-//*****          Start the program           *****//
-//************************************************//
-//
+//start app
 function checkStock() {
     connection.query("SELECT * FROM products", function (err, res) {
         console.log('----------------------------------------------')
@@ -85,47 +81,43 @@ function checkStock() {
             }
         ]).then(function (product) {
             connection.query("SELECT * FROM products JOIN departments ON products.department_name = departments.department_name",
-            function (err, res){
-                if(err) throw err;
-            var x = product.Item_ID;
-            var y = product.want_quantity;
-            if (y > res[x - 1].stock_quantity) {
-                console.log("Insufficient Quantity!");
-                connection.end();
-            } else {
-                console.log("Your order is fulfilled! Your total is $"
-                    + (y * res[x - 1].price));
-                var query = connection.query(
-                    "UPDATE products SET ? WHERE ?",
-                    [
-                        {
-                            product_sales: (y * res[x - 1].price),
-                            stock_quantity: (res[x - 1].stock_quantity - y)
-                        },
-                        {
-                            item_id: x
-                        }
-                    ],
+                function (err, res) {
+                    if (err) throw err;
+                    var x = product.Item_ID;
+                    var y = product.want_quantity;
+                    if (y > res[x - 1].stock_quantity) {
+                        console.log("Insufficient Quantity!");
+                        connection.end();
+                    } else {
+                        console.log("Your order is fulfilled! Your total is $"
+                            + (y * res[x - 1].price));
+                        var query = connection.query(
+                            "UPDATE products SET ? WHERE ?",
+                            [
+                                {
+                                    product_sales: (y * res[x - 1].price),
+                                    stock_quantity: (res[x - 1].stock_quantity - y)
+                                },
+                                {
+                                    item_id: x
+                                }
+                            ],
 
-                    'UPDATE departments SET ? WHERE ?',[
-                        {
-                            product_sales: (y * res[x - 1].price),
+                            'UPDATE departments SET ? WHERE ?', [
+                                {
+                                    product_sales: (y * res[x - 1].price),
 
-                        },
-                        {
-                            department_name: x
-                        }
-                    ]
-                )
-            };
-            continueShopping();
+                                },
+                                {
+                                    department_name: x
+                                }
+                            ]
+                        )
+                    };
+                    continueShopping();
+                });
         });
-
-
-        });
-
     })
-
 }
 checkStock(
 );
@@ -151,7 +143,7 @@ function continueShopping() {
 
 
 
-//----  Say goodbye  ----//
+//----  Exit  ----//
 function exitBamazon() {
     connection.end();
     console.log(goodbye);

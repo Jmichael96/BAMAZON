@@ -3,7 +3,8 @@ var inquirer = require('inquirer');
 var Table = require('cli-table3');
 
 let createTable = function () {
-    departmentT = new Table('Department Name', 'Over-Head-Cost', 'Product Sales', 'Total Profit')
+    table = new Table( 
+        {head: ['Department Name', 'Over-Head-Cost', 'Product Sales', 'Total Profit']})
 };
 createTable();
 
@@ -26,32 +27,18 @@ connection.connect(function (err) {
     if (err) throw err;
 });
 
-//--  table and formatting  --//
-//************************************************//
-//*****    declare global variables          *****//
-//************************************************//
-//
-
 var welcome = "    **********************************************************************\n" +
     "    **********                BAMAZON SUPERVISOR                **********\n" +
     "    **********                Manage departments                **********\n" +
-    "    **********                                                  **********\n" +
     "    **********************************************************************\n\r"
 
 var departmentMsg;
 
 var goodbye = "    **********************************************************************\n" +
     "    **********           EXTING BAMAZON SUPERVISOR              **********\n" +
-    "    **********           Making money every day!                **********\n" +
-    "    **********                                                  **********\n" +
+
     "    **********************************************************************\n\r"
 
-
-
-//************************************************//
-//*****           global functions           *****//
-//************************************************//
-//
 //----  Main menu with user input  ----//
 function supervisorMenu() {
 
@@ -72,7 +59,7 @@ function supervisorMenu() {
                     addDepartment();
                     break;
                 case "Exit":
-                    exitBamazonMgr();
+                    exitBamazonSpvs();
                     break;
             };
         });
@@ -87,22 +74,14 @@ function displayDepartments() {
         `FROM departments LEFT JOIN products ON departments.department_name = products.department_name ` +
         `GROUP BY departments.department_name;`,
         (function (err, res) {
-            if (err) throw err
-            for (let i = 0; i < res.length; i++) {
-                console.log([res[i].department_name, `$${res[i].over_head_costs}`, `$${res[i].product_sales}`, `$${res[i].total_profit}`]);
-            };
-            // res.forEach( (value)=> {
-            //     departmentT.push([
-            //         value.department_name,
-            //         value.over_head_costs,
-            //         value.product_sales,
-            //         value.total_profits,
-            //     ]);
-            // });
-            console.log(departmentT.toString());
+            if (err) throw err;
+            res.forEach(value => {
+                table.push([value.department_name, `$${value.over_head_costs}`, `$${value.product_sales}`, `$${value.total_profit}`]);
+            });
+            console.log(table.toString());
+            supervisorMenu();
         }))
-
-    supervisorMenu();
+        
 };
 
 
@@ -140,68 +119,10 @@ function addDepartment() {
 };
 
 //----  Exit the program  ----//
-function exitBamazonMgr() {
+function exitBamazonSpvs() {
     connection.end();
     console.log(goodbye);
 };
 
-
-
-
-//************************************************//
-//*****          Start the program           *****//
-//************************************************//
-//
-
 console.log(welcome);
 supervisorMenu();
-
-// connection.connect(function(err) {
-//     if (err) throw err;
-//     console.log("Successfully connected to the Bamazon Server!");
-//   })
-
-// function supervisorLog() {
-//     inquirer.prompt({
-//         type: "list",
-//         name: "Supervisor Options",
-//         message: "What would you like to do: ",
-//         choices: [
-//             'View Product Sales by Department',
-//             'Create New Department',
-//             'Exit',
-//         ]
-//     }).then(function (answer) {
-//         switch (answer.action) {
-//             case 'View Product Sales by Department':
-//                 productDepartment();
-//                 break;
-
-//             case 'Create New Department':
-//                 break;
-
-//             case 'Exit':
-//                 break;
-//         }
-
-//         function productDepartment() {
-//             connection.query('SELECT * FROM departments', function (err, res) {
-//                 if(err) throw 'you have an error';
-//                 res.forEach(value => {
-//                     let total_profits = val.total_sales - val.over_head_costs; 
-//                     departmentT.push([
-//                         value.department_id,
-//                         value.department_name,
-//                         value.over_head_costs,
-//                         value.total_sales,
-//                         total_profits,
-//                     ]);
-//                 });
-//                 console.log(departmentT.toString());
-//                 supervisorLog();
-//             })
-
-//         }
-//     });
-// };
-// supervisorLog();

@@ -183,5 +183,3 @@ function checkInventory() {
 }
 
 checkInventory();
-
-/* END JAVASCRIPT */
