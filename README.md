@@ -22,3 +22,5 @@ Each position holds different responsibilities...
 - View Product Sales By Department
 - Add and Create New Department
 
+
+![bamazon-supervisor](https://user-images.githubusercontent.com/40511023/48035437-810fb880-e129-11e8-94fc-70cbd81c239e.PNG)
