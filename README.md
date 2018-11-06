@@ -13,3 +13,12 @@ Each position holds different responsibilities...
 - Add Inventory 
 - Add New Product
 - Review Product List
+
+![bamazon-manager](https://user-images.githubusercontent.com/40511023/48035288-faf37200-e128-11e8-8362-5c1acaf7e8e4.PNG)
+![bamazon-manager2](https://user-images.githubusercontent.com/40511023/48035293-fcbd3580-e128-11e8-9c61-9dc339fc7ba1.PNG)
+![bamazon-manager3](https://user-images.githubusercontent.com/40511023/48035294-fe86f900-e128-11e8-9545-671798215caf.PNG)
+
+## Supervisor:
+- View Product Sales By Department
+- Add and Create New Department
+
