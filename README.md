@@ -1,8 +1,11 @@
 # bamazon
-
 A shopping application that allows you to be a customer, manager, and/or supervisor. 
 Each position holds different responsibilities...
-
+## Languages/Libraries Used 
+- JavaScript 
+- Node.Js
+- MySQL
+- 
 ## Customer:
 - Able to select whatever products are available
 ![bamazon-customer](https://user-images.githubusercontent.com/40511023/48035206-76085880-e128-11e8-832a-b86d9c1d7420.PNG)
